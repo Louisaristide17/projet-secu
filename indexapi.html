@@ -3,150 +3,135 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sécurité Météo</title>
+<title>Sécurité Météorite</title>
 
 <style>
-body{
-    font-family: Arial, sans-serif;
-    text-align:center;
-    background: linear-gradient(to right,#1e3c72,#2a5298);
-    color:white;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
 }
 
-h1{
-    margin-top:30px;
+body{
+    min-height:100vh;
+    background:linear-gradient(135deg,#000428,#004e92);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
 }
 
 .container{
-    margin-top:40px;
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(15px);
+    padding:30px;
+    border-radius:20px;
+    width:100%;
+    max-width:600px;
+    text-align:center;
 }
 
-input{
-    padding:10px;
-    border-radius:5px;
-    border:none;
+h1{
+    margin-bottom:20px;
 }
 
 button{
-    padding:10px;
+    padding:12px 20px;
     border:none;
-    border-radius:5px;
-    background:#ff9800;
+    border-radius:10px;
+    background:linear-gradient(45deg,#ff512f,#dd2476);
     color:white;
+    font-size:16px;
     cursor:pointer;
+    margin-bottom:20px;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.05);
 }
 
 .card{
-    background:white;
-    color:black;
-    padding:20px;
-    margin:20px auto;
-    width:320px;
-    border-radius:12px;
-}
-
-.alert{
+    background:rgba(255,255,255,0.15);
     padding:15px;
-    border-radius:10px;
-    font-weight:bold;
+    border-radius:12px;
+    margin-top:10px;
+    text-align:left;
 }
 
 .safe{
-    background:#4CAF50;
-    color:white;
-}
-
-.warning{
-    background:#ff9800;
-    color:white;
+    background:linear-gradient(45deg,#00c853,#64dd17);
+    padding:10px;
+    border-radius:10px;
+    margin-top:10px;
 }
 
 .danger{
-    background:#f44336;
-    color:white;
+    background:linear-gradient(45deg,#d50000,#ff1744);
+    padding:10px;
+    border-radius:10px;
+    margin-top:10px;
+    box-shadow:0 0 15px red;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🌦 Système de Sécurité Météo</h1>
-
 <div class="container">
-    <input type="text" id="ville" placeholder="Entrez une ville">
-    <button onclick="verifierMeteo()">Vérifier</button>
+    <h1>☄️ Sécurité Météorite</h1>
+    <button onclick="verifierMeteorites()">Vérifier les objets proches</button>
+    <div id="resultat"></div>
 </div>
-
-<div id="resultat"></div>
-<div id="alerte"></div>
 
 <script>
 
-async function verifierMeteo(){
+async function verifierMeteorites(){
 
-    let ville = document.getElementById("ville").value;
-    let apiKey = "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}";
+    let apiKey = "https://api.nasa.gov/DONKI/GST?startDate=yyyy-MM-dd&endDate=yyyy-MM-dd&api_key=DEMO_KEY";
 
-    let url = `https://api.openweathermap.org/data/2.5/weather?q=${ville}&appid=${apiKey}&units=metric&lang=fr`;
+    let today = new Date().toISOString().split("T")[0];
+
+    let url = `https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${today}&api_key=${apiKey}`;
 
     try{
 
         let response = await fetch(url);
         let data = await response.json();
 
-        if(data.cod == 200){
+        let objets = data.near_earth_objects[today];
 
-            document.getElementById("resultat").innerHTML = `
-            <div class="card">
-                <h2>${data.name}</h2>
-                <p>🌡 Température : ${data.main.temp} °C</p>
-                <p>☁ Condition : ${data.weather[0].description}</p>
-                <p>💨 Vent : ${data.wind.speed} m/s</p>
-            </div>
+        let html = "";
+
+        objets.forEach(obj => {
+
+            let nom = obj.name;
+            let taille = obj.estimated_diameter.meters.estimated_diameter_max.toFixed(0);
+            let vitesse = parseFloat(obj.close_approach_data[0].relative_velocity.kilometers_per_hour).toFixed(0);
+            let dangereux = obj.is_potentially_hazardous_asteroid;
+
+            html += `
+                <div class="card">
+                    <h3>${nom}</h3>
+                    <p>📏 Taille max : ${taille} mètres</p>
+                    <p>⚡ Vitesse : ${vitesse} km/h</p>
             `;
 
-            analyserDanger(data);
+            if(dangereux){
+                html += `<div class="danger">🚨 Objet POTENTIELLEMENT dangereux !</div>`;
+            }else{
+                html += `<div class="safe">✅ Pas de danger immédiat.</div>`;
+            }
 
-        }else{
-            document.getElementById("resultat").innerHTML =
-            "❌ Ville non trouvée.";
-        }
+            html += `</div>`;
+        });
+
+        document.getElementById("resultat").innerHTML = html;
 
     }catch(error){
-        document.getElementById("resultat").innerHTML =
-        "⚠️ Erreur de connexion.";
-    }
-
-}
-
-function analyserDanger(data){
-
-    let vent = data.wind.speed;
-    let condition = data.weather[0].main.toLowerCase();
-    let temperature = data.main.temp;
-
-    let alerteDiv = document.getElementById("alerte");
-
-    if(vent > 15 || condition.includes("thunderstorm")){
-        alerteDiv.innerHTML =
-        `<div class="alert danger">
-        🚨 DANGER ! Conditions météorologiques sévères.
-        Évitez de sortir et sécurisez-vous.
-        </div>`;
-    }
-    else if(condition.includes("rain") || temperature > 38){
-        alerteDiv.innerHTML =
-        `<div class="alert warning">
-        ⚠️ Attention ! Conditions météo difficiles.
-        Soyez prudent.
-        </div>`;
-    }
-    else{
-        alerteDiv.innerHTML =
-        `<div class="alert safe">
-        ✅ Pas de danger majeur détecté.
-        Conditions normales.
-        </div>`;
+        document.getElementById("resultat").innerHTML = "❌ Erreur de connexion à l'API NASA.";
     }
 
 }
