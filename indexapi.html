@@ -3,24 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Application Météo</title>
+<title>Sécurité Météo</title>
 
 <style>
 body{
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     text-align:center;
-    background: linear-gradient(to right,#4facfe,#00f2fe);
+    background: linear-gradient(to right,#1e3c72,#2a5298);
     color:white;
 }
 
+h1{
+    margin-top:30px;
+}
+
 .container{
-    margin-top:50px;
+    margin-top:40px;
 }
 
 input{
     padding:10px;
-    border:none;
     border-radius:5px;
+    border:none;
 }
 
 button{
@@ -37,26 +41,48 @@ button{
     color:black;
     padding:20px;
     margin:20px auto;
-    width:300px;
+    width:320px;
+    border-radius:12px;
+}
+
+.alert{
+    padding:15px;
     border-radius:10px;
+    font-weight:bold;
+}
+
+.safe{
+    background:#4CAF50;
+    color:white;
+}
+
+.warning{
+    background:#ff9800;
+    color:white;
+}
+
+.danger{
+    background:#f44336;
+    color:white;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🌤 Application Météo</h1>
+<h1>🌦 Système de Sécurité Météo</h1>
 
 <div class="container">
     <input type="text" id="ville" placeholder="Entrez une ville">
-    <button onclick="getWeather()">Voir la météo</button>
+    <button onclick="verifierMeteo()">Vérifier</button>
 </div>
 
 <div id="resultat"></div>
+<div id="alerte"></div>
 
 <script>
 
-async function getWeather(){
+async function verifierMeteo(){
 
     let ville = document.getElementById("ville").value;
     let apiKey = "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}";
@@ -64,19 +90,22 @@ async function getWeather(){
     let url = `https://api.openweathermap.org/data/2.5/weather?q=${ville}&appid=${apiKey}&units=metric&lang=fr`;
 
     try{
+
         let response = await fetch(url);
         let data = await response.json();
 
-        if(data.cod === 200){
+        if(data.cod == 200){
 
             document.getElementById("resultat").innerHTML = `
             <div class="card">
                 <h2>${data.name}</h2>
                 <p>🌡 Température : ${data.main.temp} °C</p>
-                <p>☁ Description : ${data.weather[0].description}</p>
+                <p>☁ Condition : ${data.weather[0].description}</p>
                 <p>💨 Vent : ${data.wind.speed} m/s</p>
             </div>
             `;
+
+            analyserDanger(data);
 
         }else{
             document.getElementById("resultat").innerHTML =
@@ -90,8 +119,39 @@ async function getWeather(){
 
 }
 
+function analyserDanger(data){
+
+    let vent = data.wind.speed;
+    let condition = data.weather[0].main.toLowerCase();
+    let temperature = data.main.temp;
+
+    let alerteDiv = document.getElementById("alerte");
+
+    if(vent > 15 || condition.includes("thunderstorm")){
+        alerteDiv.innerHTML =
+        `<div class="alert danger">
+        🚨 DANGER ! Conditions météorologiques sévères.
+        Évitez de sortir et sécurisez-vous.
+        </div>`;
+    }
+    else if(condition.includes("rain") || temperature > 38){
+        alerteDiv.innerHTML =
+        `<div class="alert warning">
+        ⚠️ Attention ! Conditions météo difficiles.
+        Soyez prudent.
+        </div>`;
+    }
+    else{
+        alerteDiv.innerHTML =
+        `<div class="alert safe">
+        ✅ Pas de danger majeur détecté.
+        Conditions normales.
+        </div>`;
+    }
+
+}
+
 </script>
 
 </body>
-
 </html>
