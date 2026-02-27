@@ -90,7 +90,7 @@ button:hover{
 
 async function verifierMeteorites(){
 
-    let apiKey = "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}";
+    let apiKey = "{"access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJ2IjoxLCJ1c2VyIjoiYWFva2kiLCJpc3MiOiJsb2dpbi5tZXRlb21hdGljcy5jb20iLCJleHAiOjE2ODAxMDM3MjIsInN1YiI6ImFjY2VzcyJ9.jJTSepDG4zdPsIHdPv6Skfm1HO0mmBKH9rOGz5rXJk0WS8_od3OVrq680wtWAORdA3psANwUfqNKMEc2pw1lFw","token_type":"bearer"}";
 
     let today = new Date().toISOString().split("T")[0];
 
@@ -140,5 +140,6 @@ async function verifierMeteorites(){
 
 </body>
 </html>
+
 
 
