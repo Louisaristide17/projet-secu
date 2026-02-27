@@ -90,7 +90,7 @@ button:hover{
 
 async function verifierMeteorites(){
 
-    let apiKey = "https://api.nasa.gov/DONKI/CMEAnalysis?startDate=2016-09-01&endDate=2016-09-30&mostAccurateOnly=true&speed=500&halfAngle=30&catalog=ALL&api_key=DEMO_KEY";
+    let apiKey = "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}";
 
     let today = new Date().toISOString().split("T")[0];
 
@@ -140,4 +140,5 @@ async function verifierMeteorites(){
 
 </body>
 </html>
+
 
