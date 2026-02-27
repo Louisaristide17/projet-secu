@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Application Météo</title>
+
+<style>
+body{
+    font-family: Arial;
+    text-align:center;
+    background: linear-gradient(to right,#4facfe,#00f2fe);
+    color:white;
+}
+
+.container{
+    margin-top:50px;
+}
+
+input{
+    padding:10px;
+    border:none;
+    border-radius:5px;
+}
+
+button{
+    padding:10px;
+    border:none;
+    border-radius:5px;
+    background:#ff9800;
+    color:white;
+    cursor:pointer;
+}
+
+.card{
+    background:white;
+    color:black;
+    padding:20px;
+    margin:20px auto;
+    width:300px;
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🌤 Application Météo</h1>
+
+<div class="container">
+    <input type="text" id="ville" placeholder="Entrez une ville">
+    <button onclick="getWeather()">Voir la météo</button>
+</div>
+
+<div id="resultat"></div>
+
+<script>
+
+async function getWeather(){
+
+    let ville = document.getElementById("ville").value;
+    let apiKey = "VOTRE_CLE_API";
+
+    let url = `https://api.openweathermap.org/data/2.5/weather?q=${ville}&appid=${apiKey}&units=metric&lang=fr`;
+
+    try{
+        let response = await fetch(url);
+        let data = await response.json();
+
+        if(data.cod === 200){
+
+            document.getElementById("resultat").innerHTML = `
+            <div class="card">
+                <h2>${data.name}</h2>
+                <p>🌡 Température : ${data.main.temp} °C</p>
+                <p>☁ Description : ${data.weather[0].description}</p>
+                <p>💨 Vent : ${data.wind.speed} m/s</p>
+            </div>
+            `;
+
+        }else{
+            document.getElementById("resultat").innerHTML =
+            "❌ Ville non trouvée.";
+        }
+
+    }catch(error){
+        document.getElementById("resultat").innerHTML =
+        "⚠️ Erreur de connexion.";
+    }
+
+}
+
+</script>
+
+</body>
+</html>
